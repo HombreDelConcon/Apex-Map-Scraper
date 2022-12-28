@@ -5,11 +5,15 @@ import scraperExceptions as _se
 import time
 
 def main() -> None:
+
+    #Take all the parameters passed in from cmd except for the first one which is the name of the program
     args = sys.argv[1:]
 
+    #This is just checking the length of the list of arguments provided
     if len(args) < 5:
         raise _se.ArgumentException('There are not enough parameters passed in')
-
+    
+    #Define the different options available
     options = 'hbf'
     long_options = ['help', 'background', 'front']
 
@@ -19,6 +23,7 @@ def main() -> None:
     dnums = None
     snum = None
 
+    #Define program behaviour when these options are called
     try:
         argumentLis, valueLis = getopt.getopt(args, options, long_options)
 
@@ -39,6 +44,7 @@ def main() -> None:
     except:
         raise _se.ArgumentException('Error in the first parameter')
 
+    #Map each parameter to its corresponding value
     try:
         auth = sys.argv[2]
         sid = sys.argv[3]
@@ -48,10 +54,10 @@ def main() -> None:
     except:
         raise _se.ArgumentException('Error in one of the parameters. Maybe not enough parameters? Consult the -h page for instructions')
 
+
+    #Event loop which will run the scraper and constantly chech the time 
     scraper = ApexMapScraper(auth_token=auth, acc_sid=sid, source=snum, targets=dnums, noterminal=headless)
-
     times = scraper.activeTime()
-
     while True:
         if scraper.activateSequence(times):
             try:
