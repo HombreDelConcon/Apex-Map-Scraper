@@ -5,7 +5,7 @@ Please run this program in a virtual environment as it may require some librarie
 
 Instructions: First thing to do is to make sure you have a Twilio account as we are going to be using their service to send the text messages. Creating an account is free and they give you a trial number and enough trial money to send A LOT of messages. Sending messages only costs a few pennies so the trial money should be enough so long as you are not running like 50 simultaneous instances of this program. Make sure you have the phone numbers you are going to be using be confirmed in your Twilio account (yes you need to this).
 
-To get started you will need to pass in parameters to the main program, this can be done from the command line.
+To get started you will need to pass in parameters to the main program, this isone from the command line.
 
 Options:
 
