@@ -39,8 +39,9 @@ def main() -> None:
                 headless = True
             
             elif arg in ('-f', '--front'):
+                print('passing parameters...')
                 pass
-
+                
     except:
         raise _se.ArgumentException('Error in the first parameter')
 
@@ -54,16 +55,18 @@ def main() -> None:
     except:
         raise _se.ArgumentException('Error in one of the parameters. Maybe not enough parameters? Consult the -h page for instructions')
 
-
     #Event loop which will run the scraper and constantly chech the time 
     scraper = ApexMapScraper(auth_token=auth, acc_sid=sid, source=snum, targets=dnums, noterminal=headless)
     times = scraper.activeTime()
+    if not headless:
+        print('starting event loop...')
     while True:
         if scraper.activateSequence(times):
             try:
                 x = scraper.getCurrMap()
             except:
-                print('Something Went wrong')
+                if not headless:
+                    print('Something Went wrong')
                 pass
             else:
                 scraper.sendMessage(x)
