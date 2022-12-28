@@ -13,6 +13,7 @@ class ApexMapScraper:
         self._acc_sid:str = None
         self._target_numbers:list[str] = None
         self._source_number:str = None
+        self._headless:bool = False
 
         try:
             self._auth_token = kwargs['auth_token']
@@ -25,6 +26,11 @@ class ApexMapScraper:
             self._source_number = kwargs['source']
         except:
             raise _se.ArgumentException('There one or both phone number(s) is/are missing\nrun the -h command for details')
+        
+        try:
+            self._headless = kwargs['noterminal']
+        except:
+            raise _se.ArgumentException('Error with headless arg')
 
 
     #Gets the current map in rotation
@@ -123,7 +129,7 @@ class ApexMapScraper:
         return finalTimes
 
     #This will determine whether it is time to activate the scraper
-    def activateSequence(self, times):
+    def activateSequence(self, times:list):
         timeLis = times
         curr_time = time.asctime()
         curr_time = curr_time[11:19]
