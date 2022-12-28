@@ -10,8 +10,8 @@ To get started you will need to pass in parameters to the main program, this iso
 Options:
 
 - -h, --help: help instructions
-- -b, --headless: run the program as a background process (please don't run it more than once as it may create extra instances of this which will all be sending messages when the conditions are met and I'm sure you don't want multiple copies of the same message)
-- -f, --headful: run the program with the terminal active, this means that the program will output to the terminal. Functionally it's still the same.
+- -b, --background: run the program as a background process (please don't run it more than once as it may create extra instances of this which will all be sending messages when the conditions are met and I'm sure you don't want multiple copies of the same message)
+- -f, --front: run the program with the terminal active, this means that the program will output to the terminal. Functionally it's still the same.
 
 Checklist:
 
