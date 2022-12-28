@@ -133,8 +133,7 @@ class ApexMapScraper:
 
 
 if __name__ == '__main__':
-    x = ApexMapScraper(auth_token='fdaa11e930e8968b44be4df41cc442f0', acc_sid='AC10d655c887cdafc317accd82bc0e6ff6', targets=['+15705359518'], source='+15709894196')
-    x.sendMessage(("World's Edge", 'Now'))
+    pass
 
     '''y = activeTime()
 
