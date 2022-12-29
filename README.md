@@ -29,10 +29,10 @@ Syntax:
 
 - py/python3/py3 main.py -mode "auth_token" "account_sid" "destination phone numbers in an array" "source phone number"
 
-- auth_token:string
-- account_sid:string
-- destination phone numbers:list of strings (include the country code in each phone number)
-- source phone number:string (include country code)
+- auth_token : string
+- account_sid : string
+- destination phone numbers : list of strings (include the country code in each phone number)
+- source phone number : string (include country code)
 
 
 For a future update:
