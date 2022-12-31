@@ -27,5 +27,14 @@ Before running the program there are a few things to make sure are done to run t
 
 Syntax:
 
-py/python3/py3 main.py -mode "auth_token" "account_sid" "destination phone numbers in an array" "source phone number"
+- py/python3/py3 main.py -mode "auth_token" "account_sid" "destination phone numbers in an array" "source phone number"
+
+- auth_token : string
+- account_sid : string
+- destination phone numbers : list of strings (include the country code in each phone number)
+- source phone number : string (include country code)
+
+
+For a future update:
+- Make headless mode to run on a .pyw version of the scraper
 
