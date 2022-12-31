@@ -5,6 +5,7 @@ from twilio.rest import Client
 import time
 from headers import headerDict
 import scraperExceptions as _se
+import sys
 
 class ApexMapScraper:
 
@@ -26,14 +27,46 @@ class ApexMapScraper:
             self._source_number = kwargs['source']
         except:
             raise _se.ArgumentException('There one or both phone number(s) is/are missing\nrun the -h command for details')
+        else:
+            tempArr = []
+            with open(self._target_numbers) as t:
+                for line in t:
+                    tempArr.append(line)
+                t.close()
+            self._target_numbers = tempArr
         
         try:
-            self._headless = kwargs['noterminal']
+            if kwargs['terminal'] in ('-b', '--background'):
+                self._headless = True
+            elif kwargs['terminal'] in ('-f', '--front'):
+                pass
+            else:
+                raise _se.ArgumentException('%s is not recognized as a mode' % (kwargs['terminal'], ))
         except:
-            raise _se.ArgumentException('Error with headless arg')
+            raise _se.ArgumentWarning('No mode passed in ')
+        
+        #Type checking each of the passed in parameters
+        for arg in (kwargs['auth_token'], kwargs['acc_sid'], kwargs['source'], kwargs['terminal']):
+            if type(arg) != str:
+                raise _se.ArgumentException('Parameters not of the correct type')
+        
+        for target in self._target_numbers:
+            if type(target) != str:
+                raise _se.ArgumentException('Phone number in list is not of the string type')
+
+        #Testing to make sure that all of the correct parameters were passed in. This can only be seen if the 
+        #   if the scraper is not running in headless mode
+        if not self._headless:
+            print('All parameters  passed')
+            print('acc_sid: %s\nauth_token: %s\n' % (self._acc_sid, self._auth_token))
+            print('target numbers:\n')
+            for number in self._target_numbers:
+                print('- %s' % (number,))
+            print('source number: %s' % (type(self._source_number), ))
+            print('In front mode')
 
 
-    #Gets the current map in rotation
+    #Gets the current map in rotation and returns a tuple with the current map and the time it's going to be on for
     def getCurrMap(self) -> tuple:
 
         #Stores the URL
@@ -47,7 +80,7 @@ class ApexMapScraper:
         #Makes a request to get the HTML from the URL
         html = requests.get(link, headers=HEADERS)
 
-        #Stores and cleans the HTML of the webpage we requested
+        #Stores and cleans the HTML of the webpage requested
         soup = BeautifulSoup(html.content, 'lxml')
         soup2 = BeautifulSoup(soup.prettify(), 'lxml')
 
@@ -61,7 +94,7 @@ class ApexMapScraper:
         #Stores the container with the time span the map will be available for
         timeContainer = soup2.find_all('span')
 
-        #The website stores the time tags of many different maps but I we only want the time for the
+        #The website stores the time tags of many different maps but we only want the time for the
         #   current map and so we get all the tags into an array but only really care about the start
         #   and end times for the current map which are in the indexes 2 and 3 respectively
         timeLis = []
@@ -83,7 +116,7 @@ class ApexMapScraper:
         other_half = value[2:]
 
         #This scraper only really translates into eastern time, sorry :(
-        num = str(int(value[:2]) - 4) # <---- that little -4 there does the translation
+        num = str(int(value[:2]) - 4) # <---- that little -4 there specifies how many hours to take
         return num + other_half
 
     #Of the current map is World's Edge then it sends a message to the phone numbers 
@@ -137,9 +170,28 @@ class ApexMapScraper:
             return True
         return False
 
+    #When we are running the web scraper in headless mode it will run this sequence
+    def headlessloop(self) -> None:
+        y = self.activeTime()
+        while True:
+            if self.activateSequence(y):
+                try:
+                    x = self.getCurrMap()
+                except:
+                    break
+                else:
+                    self.sendMessage(x)
+            time.sleep(1)
 
 if __name__ == '__main__':
-    pass
+
+    auth = sys.argv[2]
+    sid = sys.argv[3]
+    targets = sys.argv[4]
+    source = sys.argv[5]
+    terminal = sys.argv[1]
+
+    scraper = ApexMapScraper(auth_token=auth, acc_sid=sid, targets=targets, source=source, terminal=terminal)
 
     '''y = activeTime()
 
