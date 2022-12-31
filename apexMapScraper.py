@@ -6,6 +6,7 @@ import time
 from headers import headerDict
 import scraperExceptions as _se
 import sys
+import logging
 
 class ApexMapScraper:
 
@@ -16,17 +17,21 @@ class ApexMapScraper:
         self._source_number:str = None
         self._headless:bool = False
 
+        logging.basicConfig(filename='logs.log', encoding='utf-8', level=logging.DEBUG, format='%(levelname)s:%(message)s', filemode='w')
+
         try:
             self._auth_token = kwargs['auth_token']
             self._acc_sid = kwargs['acc_sid']
         except:
+            self.logError('Must pass in both an API key and account SID')
             raise _se.ArgumentException('Must pass in both an API key and an account SID\nrun the -h command for details')
         
         try:
             self._target_numbers = kwargs['targets']
             self._source_number = kwargs['source']
         except:
-            raise _se.ArgumentException('There one or both phone number(s) is/are missing\nrun the -h command for details')
+            self.logError('One or both phone number(s) is/are missing')
+            raise _se.ArgumentException('One or both phone number(s) is/are missing\nrun the -h command for details')
         else:
             tempArr = []
             with open(self._target_numbers) as t:
@@ -42,28 +47,42 @@ class ApexMapScraper:
                 pass
             else:
                 raise _se.ArgumentException('%s is not recognized as a mode' % (kwargs['terminal'], ))
-        except:
-            raise _se.ArgumentWarning('No mode passed in ')
+        except Exception as e:
+            self.logWarning(str(e))
+            raise _se.ArgumentWarning(str(e))
         
         #Type checking each of the passed in parameters
         for arg in (kwargs['auth_token'], kwargs['acc_sid'], kwargs['source'], kwargs['terminal']):
             if type(arg) != str:
+                self.logError('Parameter not of the correct type')
                 raise _se.ArgumentException('Parameters not of the correct type')
         
         for target in self._target_numbers:
             if type(target) != str:
+                self.logError('Phone number in list is not of the string type')
                 raise _se.ArgumentException('Phone number in list is not of the string type')
 
-        #Testing to make sure that all of the correct parameters were passed in. This can only be seen if the 
-        #   if the scraper is not running in headless mode
+        #Testing to make sure that all of the correct parameters were passed in
         if not self._headless:
             print('All parameters  passed')
+            self.logInfo('All parameters passed in successfully')
             print('acc_sid: %s\nauth_token: %s\n' % (self._acc_sid, self._auth_token))
             print('target numbers:\n')
             for number in self._target_numbers:
                 print('- %s' % (number,))
             print('source number: %s' % (type(self._source_number), ))
             print('In front mode')
+            self.logInfo('Running scraper in front mode')
+            try:
+                self.frontloop()
+            except:
+                self.logError('Error while running web scraper in front mode')
+        else:
+            self.logInfo('Running scraper in headless mode')
+            try:
+                self.headlessloop()
+            except:
+                self.logError('Error while running scraper in headless mode')
 
 
     #Gets the current map in rotation and returns a tuple with the current map and the time it's going to be on for
@@ -119,8 +138,8 @@ class ApexMapScraper:
         num = str(int(value[:2]) - 4) # <---- that little -4 there specifies how many hours to take
         return num + other_half
 
-    #Of the current map is World's Edge then it sends a message to the phone numbers 
-    #   specified in teh attribute
+    #If the current map is World's Edge then it sends a message to the phone numbers 
+    #   specified in the attribute
     def sendMessage(self, val:tuple) -> bool:
         if val[0] == "World's Edge":
             try:
@@ -152,7 +171,7 @@ class ApexMapScraper:
     #This function will create a list of all the times at which we activate the web scraper which is set to 
     #   every half hour. This is the one bit of code I am not proud of because I know there must be a more
     #   efficient way of getting all the times I want without having to do all this.
-    def activeTime(self):
+    def activeTime(self) -> list[str]:
         activateTimes0to9 = ['0' + str(i) + ':00:00' for i in range(10)]
         activateTimes10to23 = [activateTimes0to9.append(str(i) + ':00:00') for i in range(10, 24)]
         activateTimes30mins = [activateTimes0to9.append(str(i) + ':30:00') for i in range(10, 24)]
@@ -162,7 +181,7 @@ class ApexMapScraper:
         return finalTimes
 
     #This will determine whether it is time to activate the scraper
-    def activateSequence(self, times:list):
+    def activateSequence(self, times:list) -> bool:
         timeLis = times
         curr_time = time.asctime()
         curr_time = curr_time[11:19]
@@ -170,7 +189,30 @@ class ApexMapScraper:
             return True
         return False
 
-    #When we are running the web scraper in headless mode it will run this sequence
+    #--------------------LOOPING FUNCTIONS----------------------------------------
+
+    #When we are running the web scraper in front mode it will run this sequence
+    def frontloop(self) -> None:
+        y = self.activeTime()
+        print('Starting scraper in terminal display mode...')
+        print('Scraper will run at the following times:')
+        for t in y:
+            print(' - %s' % (t,))
+            print()
+        while True:
+            if self.activateSequence(y):
+                try:
+                    x = self.getCurrMap()
+                except:
+                    break
+                else:
+                    self.sendMessage(x)
+                    print('Message sent')
+            time.sleep(1)
+    
+    #We run this when we want to run the scraper in headless mode. Why a whole nother function 
+    #   that does basically the same thing but without printing? Isn't it better just to add
+    #   conditions to the first loop function? Well 
     def headlessloop(self) -> None:
         y = self.activeTime()
         while True:
@@ -182,6 +224,31 @@ class ApexMapScraper:
                 else:
                     self.sendMessage(x)
             time.sleep(1)
+    
+    #----------------------LOGGING FUNCTIONS-----------------------------------
+    def getTime(self) -> str:
+        now = time.strftime('%H:%M:%S', time.gmtime())
+        return now
+    
+    def logError(self, message:str) -> bool:
+        fullMsg = '(%s): %s' % (self.getTime(), message)
+        logging.error(fullMsg)
+        return True
+    
+    def logInfo(self, message:str) -> bool:
+        fullMsg = '(%s): %s' % (self.getTime(), message)
+        logging.info(fullMsg)
+        return True
+    
+    def logDebug(self, message:str) -> bool:
+        fullMsg = '(%s): %s' % (self.getTime(), message)
+        logging.debug(fullMsg)
+        return True
+    
+    def logWarning(self, message:str) -> bool:
+        fullMsg = '(%s): %s' % (self.getTime(), message)
+        logging.warning(fullMsg)
+        return True
 
 if __name__ == '__main__':
 
@@ -192,25 +259,4 @@ if __name__ == '__main__':
     terminal = sys.argv[1]
 
     scraper = ApexMapScraper(auth_token=auth, acc_sid=sid, targets=targets, source=source, terminal=terminal)
-
-    '''y = activeTime()
-
-    while True:
-        #print('running script, it is currently %s' % time.strftime('%H:%M:%S'))
-        if activateSequence(y):
-            try:
-                x = getCurrMap()
-            except:
-                print('Something Went wrong')
-                pass
-            else:
-                sendMessage(x)
-        time.sleep(1)
-        #print('TIME: ' + time.asctime())'''
-
-
-
-
-
-
 
