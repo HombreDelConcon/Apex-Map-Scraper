@@ -27,14 +27,13 @@ Before running the program there are a few things to make sure are done to run t
 
 Syntax:
 
-- py/python3/py3 main.py -mode "auth_token" "account_sid" "destination phone numbers in an array" "source phone number"
+- py/python3/py3 main.py -mode "auth_token" "account_sid" "destination phone numbers in a separate text file" "source phone number"
 
 - auth_token : string
 - account_sid : string
-- destination phone numbers : list of strings (include the country code in each phone number)
+- destination phone numbers : string (include country code)
 - source phone number : string (include country code)
 
 
-For a future update:
-- Make headless mode to run on a .pyw version of the scraper
-
+Debug:
+- Program runs normally on everything except on headless mode. The expectation is that the program starts running in the background after it is called by the main function and then the main function just stops and leaves the .pyw file running in the background. What is happening is that the main file starts waiting for the .pyw file to be done running, and the scraper runs on an infinite loop so unless the .pyw file is killed in some way, the main function just stays running. 
