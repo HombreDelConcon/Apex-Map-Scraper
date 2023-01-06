@@ -1,5 +1,0 @@
-INFO:(20:54:58): Running scraper in headless mode
-DEBUG:Starting new HTTP connection (1): httpbin.org:80
-DEBUG:http://httpbin.org:80 "GET /get HTTP/1.1" 200 305
-DEBUG:Starting new HTTPS connection (1): apexlegendsstatus.com:443
-DEBUG:https://apexlegendsstatus.com:443 "GET /current-map HTTP/1.1" 200 None
