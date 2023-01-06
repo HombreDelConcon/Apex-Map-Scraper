@@ -64,9 +64,11 @@ def main() -> None:
     else:
         print('Starting scraper in headless mode')
         try:
-            subprocess.run(['pyw', 'apexMapScraperHeadless.pyw', headparam, auth, sid, dnums, snum])
+            subprocess.Popen(['pyw', 'apexMapScraperHeadless.pyw', headparam, auth, sid, dnums, snum])
         except:
             print('apexMapScraperHeadless.pyw could not be found')
+        else:
+            print('main file done')
 
 if __name__ == '__main__':
     main()

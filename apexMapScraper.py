@@ -156,16 +156,28 @@ class ApexMapScraper:
                                 )
                 
             except Exception as e:
-                print('Could not send message')
-                print(str(e))
+                if self._headless == False:
+                    print('Could not send message')
+                    print(str(e))
+                    self.logError('Could not send message in front mode')
+                else:
+                    self.logError('Could not send message in headless mode')
                 return False
 
             else:
-                print('Message sent')
+                if self._headless == False:
+                    print('Message sent')
+                    self.logError('Message sent in front mode')
+                else:
+                    self.logError('Message sent in headless mode')
                 return True
         else:
             timeNow = time.asctime()
-            print('Map not in yet | Time: ' + timeNow)
+            if self._headlesss == False:
+                print('Map not in yet | Time: ' + timeNow)
+                self.logInfo('Map not in yet in front mode')
+            else:
+                self.logInfo('Map not in yet in headless mode')
             return False
 
     #This function will create a list of all the times at which we activate the web scraper which is set to 
