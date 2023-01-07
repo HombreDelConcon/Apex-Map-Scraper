@@ -40,6 +40,3 @@ Example:
 
 - py main.py -b 39480375549054908 54039850348503850 targetNumbers.txt +18096343759
 
-Debug:
-
-- Passing the -h option to the main file will raise an exception
