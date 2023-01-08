@@ -33,7 +33,7 @@ Syntax:
 
 - auth_token : string
 - account_sid : string
-- destination phone numbers : string (include country code)
+- destination phone numbers : text file copntaining phone numbers with one phone number per line
 - source phone number : string (include country code)
 
 Example:
